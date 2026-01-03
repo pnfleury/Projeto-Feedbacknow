@@ -1,0 +1,51 @@
+
+
+services:
+  # --- Banco de Dados ---
+  db:
+    image: postgres:17.5
+    container_name: feedbacknow-db
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: always
+
+  # --- API REST Java ---
+  api-java:
+    build: ./api-java
+    container_name: feedbacknow-api-java
+    depends_on:
+      - db
+      - api-flask
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/feedbacks_db
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      API_FLASK_URL: ${API_FLASK_URL}
+      API_FLASK_BATCH: ${API_FLASK_BATCH}
+      API_AUTH_USERNAME: ${API_AUTH_USERNAME}
+      API_AUTH_PASSWORD: ${API_AUTH_PASSWORD}
+      INSTAGRAM_VERIFY_TOKEN: ${INSTAGRAM_VERIFY_TOKEN}
+      INSTAGRAM_ACCESS_TOKEN: ${INSTAGRAM_ACCESS_TOKEN}
+      INSTAGRAM_APP_SECRET: ${INSTAGRAM_APP_SECRET}
+    restart: always
+  
+  # --- API FLASK --- 
+  api-flask:
+    build: ./api-flask
+    container_name: feedbacknow-api-flask
+    ports:
+      - "5000:5000"
+    restart: always
+
+volumes:
+  pgdata:

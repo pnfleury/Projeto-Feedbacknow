@@ -1,0 +1,21 @@
+# Segredos
+.env
+
+# Java / Maven
+target/
+*.jar
+*.war
+.mvn/wrapper/maven-wrapper.properties
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+
+# IDEs
+.idea/
+.vscode/
+.settings/
+.project/
