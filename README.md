@@ -235,7 +235,7 @@ O uso do .env.example permite que novos desenvolvedores configurem seu ambiente 
 
 ## 🌐 CORS
 
-Configurado para permitir acesso do frontend local (Streamlit):
+Configurado para permitir acesso do frontend local desenvolvido em Streamlit (em desenvolvimento):
 
 ```text
 http://localhost:8501
