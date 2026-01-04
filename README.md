@@ -58,7 +58,7 @@ Detalhamento dos Campos
 
 * "comentario" é um tipo string obrigatório.
 * "threshold" é um tipo float que pode ser opcional.  
-  Observação sobre o Threshold: > Este campo permite ajustar o rigor da classificação.  
+  Observação sobre o Threshold: Este campo permite ajustar o rigor da classificação.  
   Por padrão (0.5), qualquer predição com probabilidade superior a esse valor é marcada como POSITIVO.  
   Se você deseja que o modelo seja mais criterioso para classificar algo como positivo, você pode aumentar este valor (ex: 0.8).
 
