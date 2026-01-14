@@ -19,3 +19,6 @@ venv/
 .vscode/
 .settings/
 .project/
+
+# Outros
+antes_de_subir.txt

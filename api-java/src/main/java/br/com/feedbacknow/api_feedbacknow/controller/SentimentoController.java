@@ -9,6 +9,7 @@ import br.com.feedbacknow.api_feedbacknow.repository.SentimentRepository;
 import br.com.feedbacknow.api_feedbacknow.service.BatchService;
 import br.com.feedbacknow.api_feedbacknow.service.SentimentService;
 import br.com.feedbacknow.api_feedbacknow.service.SentimentoAnalyzer;
+import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.validation.Valid;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -21,17 +22,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
 import java.util.List;
-
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/")
-public class SentimentoController  {
+public class SentimentoController {
 
     private final SentimentoAnalyzer sentimentoAnalyzer;
     private final SentimentService sentimentService;
-    //private final SentimentRepository repository;
     private final BatchService batchService;
 
     // Construtor manual (faz exatamente o que o Lombok faria)
@@ -39,21 +38,31 @@ public class SentimentoController  {
     public SentimentoController(SentimentoAnalyzer sentimentoAnalyzer, SentimentService sentimentService, SentimentRepository repository, BatchService batchService) {
         this.sentimentoAnalyzer = sentimentoAnalyzer;
         this.sentimentService = sentimentService;
-       // this.repository = repository;
+        // this.repository = repository;
         this.batchService = batchService;
     }
+
+    //criar
+    public ResponseEntity<SentimentoResponse> criar(
+            @RequestBody SentimentoResponse request,
+            @RequestParam(required = false, defaultValue = "MANUAl") String origem
+    ) {
+        SentimentoResponse response = sentimentService.saveSentiment(request, origem);
+        return ResponseEntity.ok(response);
+    }
+
 
     // Envia o comentario para a api Flask
     @PostMapping("/sentiment")
     public ResponseEntity<SentimentoResponse> analyze(@Valid @RequestBody SentimentoRequest request) {
 
         // 1. Recebe a análise da IA (ainda sem ID/Data)
-        SentimentoResponse responseIA = sentimentoAnalyzer.analyzeComment(request.comentario(), request.threshold());
+        SentimentoResponse responseIA = sentimentoAnalyzer.analyzeComment(request.comentario());
         if (responseIA == null) {
             return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).build();
         }
         // 2. SALVA e CAPTURA o novo objeto que o Service criou com os dados do banco
-        SentimentoResponse responseSalva = sentimentService.saveSentiment(responseIA);
+        SentimentoResponse responseSalva = sentimentService.saveSentiment(responseIA, "Manual");
 
         // 3. RETORNA o objeto que tem o ID (responseSalva) e não o original (responseIA)
         return ResponseEntity.status(HttpStatus.CREATED).body(responseSalva);
@@ -74,17 +83,15 @@ public class SentimentoController  {
     }
 
     // LISTA REGISTROS DO BANCO
-    @GetMapping ("/sentiments")
+    @GetMapping("/sentiments")
     public ResponseEntity<PaginaResponse<SentimentoResponse>> listar(
             @ParameterObject @PageableDefault(page = 0,
-                    size = 10,
+                    size = 20, // aumenta o número de registros por página
                     sort = "criadoEm",
-                    direction = Sort.Direction.DESC ) Pageable paginacao) {
+                    direction = Sort.Direction.DESC) Pageable paginacao) {
 
-        // Busca a página completa
         Page<SentimentoResponse> paginaResultado = sentimentService.listarTodos(paginacao);
 
-        // Converte para o seu formato enxuto (usando os mesmos nomes que definimos antes)
         PaginaResponse<SentimentoResponse> respostaEnxuta = new PaginaResponse<>(
                 paginaResultado.getContent(),
                 paginaResultado.getNumber(),
@@ -98,7 +105,10 @@ public class SentimentoController  {
     // LISTA REGISTRO DO BANCO POR ID
     @GetMapping("sentiment/{id}")
     public ResponseEntity<SentimentoResponse> buscarPorId(@PathVariable Long id) {
-        return sentimentService.buscarPorId(id)
+
+        Optional<SentimentoResponse> response = sentimentService.buscarPorId(id);
+
+        return response
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -110,7 +120,7 @@ public class SentimentoController  {
             @ParameterObject @PageableDefault(size = 10,
                     page = 0,
                     sort = "criadoEm",
-                    direction = Sort.Direction.DESC ) Pageable paginacao) {
+                    direction = Sort.Direction.DESC) Pageable paginacao) {
 
         // Converte aqui para maiúsculas para bater com o Enum
         SentimentType tipo = SentimentType.valueOf(sentimentoStr.toUpperCase());
@@ -129,11 +139,21 @@ public class SentimentoController  {
         return ResponseEntity.ok(respostaEnxuta);
     }
 
-    @GetMapping ("/health")
-        public ResponseEntity<String> health(){
-            return ResponseEntity.ok("OK");
-        }
+    @Hidden
+    @GetMapping("/sentiments/all")
+    public ResponseEntity<List<SentimentoResponse>> listarTodosSemPagina() {
+        // Busca todos os registros do banco
+        List<SentimentoResponse> todos = sentimentService.listarTodosSemPagina();
+        return ResponseEntity.ok(todos);
+    }
+
+    @GetMapping("/health")
+    public ResponseEntity<String> health() {
+        return ResponseEntity.ok("OK");
+    }
+    @Hidden
+    @PostMapping("/batch/json")
+    public ResponseEntity<List<SentimentoResponse>> processarListaJson(@RequestBody List<String> linhas) {
+        return ResponseEntity.ok(batchService.processarListaStrings(linhas));
+    }
 }
-
-
-

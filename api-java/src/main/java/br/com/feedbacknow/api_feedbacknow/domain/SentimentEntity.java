@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -17,7 +18,7 @@ public class SentimentEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "comentario", columnDefinition = "TEXT")
+    @Column(name = "comentario", columnDefinition = "TEXT", nullable = false)
     private String comentario;
 
     @Enumerated(EnumType.STRING)
@@ -30,7 +31,21 @@ public class SentimentEntity {
     @Column(nullable = true)
     private String topFeatures;
 
+    // ADICIONE ESTA LINHA AQUI:
+    @Column(name = "origem")
+    private String origem;
+
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
     private LocalDateTime criadoEm;
+
+    @Column(nullable = false)
+    private Boolean visible = true;
+
+    @Column(nullable = false)
+    private Boolean deleted = false;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at") //Hibernate cuidar disso automaticamente.
+    private LocalDateTime updatedAt;
 }

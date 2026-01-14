@@ -1,0 +1,437 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global page styles (Tailwind utilities will be available now) */
+body {
+    font-family: 'Inter', sans-serif;
+    color: #f8fafc;
+    /* Use a blue gradient background similar to original design */
+    background: linear-gradient(180deg, #322e99 0%, rgba(30, 29, 79, 0.8) 100%);
+    /* allow page scrolling when content overflows */
+    overflow: auto;
+}
+
+/* Simple layout for Home component so it works without Tailwind */
+.home-root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    text-align: center;
+    /* Move the content slightly up so headings sit higher on the page */
+    transform: translateY(-6vh);
+}
+.home-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #60a5fa; /* blue-400 */
+    margin-bottom: 0.25rem;
+}
+.home-subtitle {
+    color: #9ca3af; /* gray-400 */
+    margin-bottom: 1.5rem;
+}
+.home-cards {
+    width: 100%;
+    max-width: 56rem; /* reduced from 64rem for narrower layout */
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+@media (min-width: 768px) {
+    .home-cards { grid-template-columns: 1fr 1fr; }
+}
+.home-root { /* ensure small-screen adjustment is handled below */ }
+@media (max-width: 480px) {
+    .home-root { transform: translateY(-4vh); padding-top: 1.5rem; }
+}
+.home-card {
+    padding: 2rem;
+    border-radius: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.08);
+}
+.home-card h2 { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.75rem; }
+.home-card p { color: #9ca3af; margin-bottom: 1rem; }
+.home-card-btn {
+    width: 100%;
+    padding: 0.9rem 1rem;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: background-color 160ms ease, color 160ms ease, transform 120ms ease;
+}
+.home-card-btn.primary { background: #2563eb; color: white; }
+.home-card-btn.secondary { background: rgba(255,255,255,0.06); color: #f8fafc; }
+
+/* Hover / focus interactions */
+.home-card-btn.primary:hover,
+.home-card-btn.primary:focus {
+    background: #1d4ed8; /* darker blue */
+    transform: translateY(-3px);
+}
+.home-card-btn.secondary:hover,
+.home-card-btn.secondary:focus {
+    background: rgba(255,255,255,0.12);
+    transform: translateY(-3px);
+}
+.home-card-btn:active {
+    transform: translateY(0);
+}
+.home-card-btn:focus {
+    outline: 3px solid rgba(99,102,241,0.15);
+    outline-offset: 2px;
+}
+
+/* Page-level container for centered modal-like panels */
+.page-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 4rem);
+    padding: 2rem;
+}
+.modal-panel {
+    width: 100%;
+    max-width: 600px; /* slightly narrower panels */
+    background: rgba(255,255,255,0.03);
+    border-radius: 1.25rem;
+    padding: 2.5rem;
+    box-shadow: 0 8px 30px rgba(2,6,23,0.6);
+    border: 1px solid rgba(255,255,255,0.06);
+}
+.close-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: transparent;
+    border: none;
+    color: #cbd5e1;
+    font-size: 1.1rem;
+    cursor: pointer;
+}
+.form-input {
+    width: 100%;
+    padding: 0.9rem;
+    border-radius: 0.75rem;
+    background: rgba(255,255,255,0.03);
+    color: #e2e8f0; /* slightly darker text for inputs */
+    border: 1px solid rgba(255,255,255,0.04);
+    margin-bottom: 0.85rem;
+}
+.textarea-feedback {
+    width: 100%;
+    min-height: 9rem;
+    padding: 0.9rem;
+    border-radius: 1rem;
+    resize: vertical;
+    background: rgba(255,255,255,0.02);
+    color: #e2e8f0; /* slightly darker textarea text */
+    border: 1px solid rgba(255,255,255,0.04);
+}
+.form-actions { margin-top: 1rem; display: flex; gap: 0.75rem; flex-direction: column; }
+.form-actions .home-card-btn { width: 100%; }
+
+/* Admin layout (sidebar + main) */
+.admin-root {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 1.5rem;
+    align-items: start;
+    padding: 2.5rem;
+}
+.admin-sidebar {
+    background: rgba(255,255,255,0.02);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    border: 1px solid rgba(255,255,255,0.04);
+    height: calc(100vh - 4rem);
+    position: sticky;
+    top: 2rem;
+}
+.sidebar-brand { font-weight: 800; color: #60a5fa; margin-bottom: 1rem; font-size: 1.1rem; }
+.admin-sidebar > div .sidebar-brand { margin-bottom: 0; display: flex; align-items: center; }
+.sidebar-nav { display: flex; flex-direction: column; gap: 0.5rem; }
+.sidebar-link {
+    text-align: left;
+    background: transparent;
+    border: none;
+    color: #cbd5e1;
+    padding: 0.6rem 0.8rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+}
+.sidebar-link:hover { background: rgba(255,255,255,0.03); color: #fff; }
+.admin-main { padding: 0.5rem 1rem; }
+.admin-main-header { display:flex; align-items:center; justify-content:space-between; margin-bottom: 1rem; }
+.muted { color: #9ca3af; }
+.stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 1rem; }
+.stat-grid { /* keep stat cards below the header so they don't overlap */
+    margin-top: 0.75rem;
+}
+admin-sidebar > div {
+    display: flex;
+    align-items: center; /* Mantém alinhado verticalmente ao brand */
+    justify-content: space-between;
+    height: 40px; /* Altura fixa para evitar saltos */
+}
+
+/* Visão Geral: Gráfico ao centro e botões à direita (um acima do outro) */
+.visao-geral-container {
+    display: grid;
+    grid-template-columns: 1fr 200px; /* Gráfico largo e coluna estreita para botões */
+    gap: 1.5rem;
+    align-items: start;
+    margin-top: 1rem;
+}
+
+.botoes-laterais {
+    display: flex;
+    flex-direction: column; /* Um acima do outro */
+    gap: 1rem;
+}
+
+/* Ajuste do botão hambúrguer no estado colapsado */
+.admin-root.collapsed .admin-sidebar {
+    width: 60px;
+    padding: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.stat-card {
+    background: rgba(8,12,22,0.6); /* slightly darker panel */
+    padding: 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(255,255,255,0.025);
+    box-shadow: 0 6px 14px rgba(2,6,23,0.35); /* soft base shadow */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+.stat-value { font-size: 1.9rem; font-weight: 900; color: #e6eefc; }
+.stat-label { color: #9ca3af; margin-top: 0.25rem; }
+.stat-card { cursor: pointer; transition: transform 160ms ease, box-shadow 160ms ease; }
+.stat-card:hover { transform: translateY(-4px); box-shadow: 0 14px 30px rgba(2,6,23,0.48); }
+
+/* collapsed sidebar support: hide details and show only hamburger */
+.admin-root.collapsed { grid-template-columns: 56px 1fr; }
+.admin-root.collapsed .admin-sidebar { width: 56px; padding: 0.3rem; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.admin-root.collapsed .sidebar-brand { display: none; }
+.admin-root.collapsed .sidebar-nav { display: none; }
+.admin-root.collapsed .sidebar-link { display: none; }
+
+/* show a restore control inside the main header when collapsed */
+.sidebar-restore {
+    display: none;
+}
+.admin-root.collapsed .sidebar-restore {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.04);
+    color: #cbd5e1;
+    padding: 0.45rem 0.6rem;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* header toggle button shown when sidebar is collapsed/expanded */
+.sidebar-toggle {
+    background: transparent;
+    border: none;
+    color: #cbd5e1;
+    font-size: 1.2rem;
+    padding: 0.35rem 0.6rem;
+    border-radius: 8px;
+    cursor: pointer;
+}
+.sidebar-toggle:hover { background: rgba(255,255,255,0.03); color: #fff; }
+
+/* Aside-specific small toggle aligned to the brand baseline */
+.aside-toggle {
+    font-size: 1rem;
+    padding: 0.15rem 0.45rem;
+    margin-left: 0.25rem;
+    align-self: center;
+    background: transparent;
+    border: none;
+    color: #cbd5e1;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.aside-toggle:hover { background: rgba(255,255,255,0.03); color: #fff; }
+
+/* When collapsed, keep the aside toggle visible and centered */
+.admin-root.collapsed .aside-toggle { margin-left: 0; }
+
+/* adjust main area so content fills when sidebar hidden */
+.admin-root.collapsed .admin-main { padding-left: 1rem; }
+.recent-feedback ul { color: #e6eefc; margin-top: 0.5rem; }
+
+/* Charts area */
+.charts { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 1rem; }
+.chart-card {
+    background: rgba(75,85,99,0.06); /* light translucent gray */
+    padding: 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(255,255,255,0.03);
+    box-shadow: 0 8px 22px rgba(2,6,23,0.28); /* subtle lift */
+    transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+}
+.chart-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 40px rgba(2,6,23,0.38);
+    border-color: rgba(255,255,255,0.06);
+}
+.chart-card h4 { margin: 0 0 0.75rem 0; color: #e6eefc; }
+.chart-line { width: 100%; height: 140px; }
+.chart-donut { display: block; margin: 0 auto; }
+
+@media (max-width: 900px) {
+    .charts { grid-template-columns: 1fr; }
+    .stat-grid { grid-template-columns: repeat(2, 1fr); margin-top: -1.5rem; }
+}
+
+@media (max-width: 900px) {
+    .admin-root { grid-template-columns: 1fr; padding: 1rem; }
+    .admin-sidebar { position: relative; height: auto; }
+    .stat-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+
+/* Glassmorphism */
+.glass {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sidebar-transition { 
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
+}
+
+/* Animações */
+.notification-pulse {
+    animation: pulse-blue 2s infinite;
+}
+
+@keyframes pulse-blue {
+    0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+}
+
+.fade-in { 
+    animation: fadeIn 0.5s ease-out; 
+}
+
+@keyframes fadeIn { 
+    from { opacity: 0; transform: translateY(10px); } 
+    to { opacity: 1; transform: translateY(0); } 
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+
+/* Modal styles for social message */
+#social-modal .glass { max-width: 720px; }
+#social-modal .absolute { z-index: 40; }
+#social-modal .glass { z-index: 50; }
+
+.feedback-item-list {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 12px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  display: flex;
+  gap: 10px;
+}
+
+.pos-tic { border-right: 3px solid #10b981; }
+.neg-tic { border-right: 3px solid #ef4444; }
+
+/* Botões de seta */
+.nav-arrow {
+  background: #2a2f45;
+  color: white;
+  border: 1px solid #4a4f65;
+  padding: 8px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.nav-arrow:hover:not(:disabled) {
+  background: #3a3f55;
+}
+
+.nav-arrow:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Sidebar colapsada mantém hambúrguer fixo à esquerda */
+.collapsed .admin-sidebar {
+  width: 60px;
+}
+
+.collapsed .sidebar-toggle {
+  margin: 0 auto;
+}
+
+.page-container {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #0f172a; /* Fundo escuro padrão */
+}
+
+.modal-panel {
+  width: 100%;
+  max-width: 380px;
+  padding: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-input {
+  width: 100%;
+  padding: 12px 16px;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid #334155;
+  border-radius: 8px;
+  color: white;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-input:focus {
+  border-color: #3b82f6;
+}
+
+.form-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+

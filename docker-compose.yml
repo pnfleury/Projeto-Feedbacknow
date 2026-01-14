@@ -1,14 +1,12 @@
-
-
 services:
   # --- Banco de Dados ---
   db:
     image: postgres:17.5
     container_name: feedbacknow-db
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB:-feedbacknow}
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
     ports:
       - "5432:5432"
     volumes:
@@ -26,17 +24,17 @@ services:
       - "8080:8080"
     env_file:
       - .env
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/feedbacks_db
-      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
-      API_FLASK_URL: ${API_FLASK_URL}
-      API_FLASK_BATCH: ${API_FLASK_BATCH}
-      API_AUTH_USERNAME: ${API_AUTH_USERNAME}
-      API_AUTH_PASSWORD: ${API_AUTH_PASSWORD}
-      INSTAGRAM_VERIFY_TOKEN: ${INSTAGRAM_VERIFY_TOKEN}
-      INSTAGRAM_ACCESS_TOKEN: ${INSTAGRAM_ACCESS_TOKEN}
-      INSTAGRAM_APP_SECRET: ${INSTAGRAM_APP_SECRET}
+    environment:   
+      - TZ=${TIME_ZONE:-America/Sao_Paulo}   
+      - SPRING_DATASOURCE_URL=${DB_URL:-jdbc:postgresql://feedbacknow-db:5432/${POSTGRES_DB}}
+      - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
+      - SPRING_DATASOURCE_PASSWORD=${POSTGRES_PASSWORD}
+      - API_FLASK_URL=${API_FLASK_URL}
+      - API_FLASK_BATCH=${API_FLASK_BATCH}
+      - jwt.secret=${JWT_SECRET}
+      - instagram.webhook.verify-token=${INSTAGRAM_VERIFY_TOKEN}
+      - instagram.api.access-token=${INSTAGRAM_ACCESS_TOKEN}
+      - instagram.api.app-secret=${INSTAGRAM_APP_SECRET}
     restart: always
   
   # --- API FLASK --- 
@@ -47,5 +45,19 @@ services:
       - "5000:5000"
     restart: always
 
+  # --- FRONTEND REACT (Vite + Nginx) ---
+  frontend:
+    build:
+      context: ./frontend-react
+      args:
+        VITE_API_URL: ${VITE_API_URL}
+    container_name: feedbacknow-frontend
+    depends_on:
+      - api-java
+    ports:
+      - "5173:80"
+    restart: always
+
 volumes:
   pgdata:
+    driver: local

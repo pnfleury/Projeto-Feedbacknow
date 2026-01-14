@@ -48,7 +48,8 @@ public class SocialMediaService {
                 comentario,
                 analise.sentimento(),
                 analise.probabilidade(),
-                features
+                features,
+                "Instagram"
         );
 
         comentarioRepository.save(entity);

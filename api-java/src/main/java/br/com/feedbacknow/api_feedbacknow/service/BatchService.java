@@ -26,20 +26,28 @@ public class BatchService {
     private final SentimentRepository repository;
 
     @Value("${api.flask.batch}")
-    private String apiFlaskBatchUrl;
+    private String flaskBatchUrl;
 
+    // --- 1. NOVO MÉTODO PARA O REACT (JSON) ---
+    @Transactional
+    public List<SentimentoResponse> processarListaStrings(List<String> listaTextos) {
+        if (listaTextos == null || listaTextos.isEmpty()) {
+            throw new RuntimeException("A lista de comentários está vazia.");
+        }
+        // Chama a lógica centralizada
+        return executarAnaliseESalvamento(listaTextos);
+    }
+
+    // --- 2. MÉTODO ATUAL (CSV/MULTIPART) ---
     @Transactional
     public List<SentimentoResponse> processarCsv(MultipartFile file) {
         List<String> listaTextos = new ArrayList<>();
 
-
-        // 1. LEITURA ROBUSTA DO CSV (Ignora vírgulas internas e aspas ausentes)
         try (BufferedReader br = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
             String linha;
             boolean primeiraLinha = true;
-
             while ((linha = br.readLine()) != null) {
-                if (primeiraLinha) { // Pula o cabeçalho "comentario" ou "texto"
+                if (primeiraLinha) {
                     primeiraLinha = false;
                     continue;
                 }
@@ -51,41 +59,41 @@ public class BatchService {
             throw new RuntimeException("Erro ao ler arquivo: " + e.getMessage());
         }
 
-        if (listaTextos.isEmpty()) {
-            throw new RuntimeException("O arquivo CSV está vazio ou mal formatado.");
-        }
+        // Chama a mesma lógica centralizada
+        return executarAnaliseESalvamento(listaTextos);
+    }
 
+    // --- 3. LÓGICA CENTRALIZADA (O "Coração" do Service) ---
+    private List<SentimentoResponse> executarAnaliseESalvamento(List<String> listaTextos) {
         try {
-            // 2. CHAMADA PARA A IA (Flask)
+            // CHAMADA PARA A IA (Flask)
             BatchRequestDTO payload = new BatchRequestDTO(listaTextos);
 
-            // Recebe os dados da IA (incluindo topFeatures)
+            // Importante: Verifique se a URL no seu application.properties está correta
             SentimentoResponse[] responseArray = restTemplate.postForObject(
-                    apiFlaskBatchUrl, payload, SentimentoResponse[].class);
+                    flaskBatchUrl, payload, SentimentoResponse[].class);
 
             if (responseArray == null) throw new RuntimeException("Sem resposta da IA");
 
-            // 3. CONVERSÃO PARA ENTITY E SALVAMENTO
+            // CONVERSÃO PARA ENTITY E SALVAMENTO
             List<SentimentEntity> entidadesParaSalvar = Arrays.stream(responseArray)
                     .map(res -> {
                         SentimentEntity entity = new SentimentEntity();
                         entity.setComentario(res.comentario());
-                        // Garante que o Enum entenda o que vem do Python
                         entity.setSentimento(SentimentType.valueOf(res.sentimento().toUpperCase()));
                         entity.setProbabilidade(res.probabilidade());
+                        entity.setOrigem("BATCH_PROCESS"); // Identificador de origem
 
-                        // Salva a lista de topFeatures como uma String separada por vírgula
                         if (res.topFeatures() != null && !res.topFeatures().isEmpty()) {
                             entity.setTopFeatures(String.join(", ", res.topFeatures()));
                         }
-
                         return entity;
                     })
                     .toList();
 
             List<SentimentEntity> entidadesSalvas = repository.saveAll(entidadesParaSalvar);
 
-            // 4. RETORNO PARA O USUÁRIO (DTO Final)
+            // RETORNO FORMATADO (DTO)
             return entidadesSalvas.stream()
                     .map(entity -> {
                         List<String> featuresList = null;
@@ -98,14 +106,15 @@ public class BatchService {
                                 entity.getComentario(),
                                 entity.getSentimento().name(),
                                 entity.getProbabilidade(),
-                                featuresList, // Agora retorna as topFeatures corretamente!
-                                entity.getCriadoEm()
+                                featuresList,
+                                entity.getCriadoEm(),
+                                entity.getOrigem()
                         );
                     })
                     .toList();
 
         } catch (Exception e) {
-            throw new RuntimeException("Erro no processamento em lote: " + e.getMessage());
+            throw new RuntimeException("Erro no processamento técnico: " + e.getMessage());
         }
     }
 }

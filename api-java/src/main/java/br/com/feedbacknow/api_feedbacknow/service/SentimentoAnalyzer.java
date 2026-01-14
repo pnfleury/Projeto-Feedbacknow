@@ -21,8 +21,8 @@ public class SentimentoAnalyzer {
         this.restTemplate = restTemplate;
     }
 
-    public SentimentoResponse analyzeComment(String comentario, Double threshold) {
-        SentimentoRequest requestBody = new SentimentoRequest(comentario, threshold);
+    public SentimentoResponse analyzeComment(String comentario) {
+        SentimentoRequest requestBody = new SentimentoRequest(comentario);
 
         try {
             // Simplificado: postForObject já entende que deve enviar como JSON

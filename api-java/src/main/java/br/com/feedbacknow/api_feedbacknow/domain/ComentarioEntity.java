@@ -41,13 +41,17 @@ public class ComentarioEntity {
     @Column(name = "top_feature")
     private List<String> topFeatures;
 
+    @Column(name = "origem")
+    private String origem;
+
     @Column(name = "criado_em")
     private LocalDateTime criadoEm;
 
     public ComentarioEntity() {}
 
+
     public ComentarioEntity(String postId, String userId, String userName, String texto,
-                            String sentimento, double probabilidade, List<String> topFeatures) {
+                            String sentimento, double probabilidade, List<String> topFeatures, String origem) {
         this.postId = postId;
         this.userId = userId;
         this.userName = userName;
@@ -55,6 +59,7 @@ public class ComentarioEntity {
         this.sentimento = sentimento;
         this.probabilidade = probabilidade;
         this.topFeatures = topFeatures;
+        this.origem = origem;
         this.criadoEm = LocalDateTime.now();
     }
 

@@ -4,7 +4,7 @@
 
 # 1. Visão Geral
 Este sistema automatiza a classificação de feedbacks de clientes, identificando se um comentário é Positivo ou Negativo.  
-O projeto utiliza uma arquitetura híbrida onde o Java gerencia as regras de negócio e persistência, enquanto o Python provê a inteligência preditiva.
+O projeto utiliza uma arquitetura híbrida onde o Java gerencia as regras de negócio e persistência, enquanto o Python provê a inteligência preditiva. Tudo isso é acessível através de um frontend React intuitivo e moderno.
 
 # 2. Dependências e Versões
 
@@ -12,38 +12,47 @@ O projeto utiliza uma arquitetura híbrida onde o Java gerencia as regras de neg
 A camada de aplicação foi construída com foco em segurança, robustez e performance:
 
 * Java 21 / Spring Boot 3.x: Núcleo da aplicação.
-* Spring Security (Basic Auth): Proteção de todos os endpoints contra acesso não autorizado.
+* Spring Security (JSON Web Tokens) arquitetura Stateless para garantir a integridade e a autenticação das requisições do frontend.
+* Spring Security (Basic Auth): Apenas para facilitar o acesso  pelo Postman, Insomnia ou Swagger.
 * Hibernate (JPA): Mapeamento Objeto-Relacional para persistência no banco de dados.
-*	PostgreSQL: Banco de dados relacional para armazenamento dos feedbacks.
-*	Bean Validation: Garantia de que os dados de entrada (como o texto do comentário) seguem as regras de negócio.
-*	SLF4J / Logback: Sistema de log detalhado para auditoria e depuração.
-* 	Swagger UI (SpringDoc): Interface interativa para documentação e teste da API.
+* PostgreSQL: Banco de dados relacional para armazenamento dos feedbacks.
+* Bean Validation: Garantia de que os dados de entrada (como o texto do comentário) seguem as regras de negócio.
+* SLF4J / Logback: Sistema de log detalhado para auditoria e depuração.
+* Swagger UI (SpringDoc): Interface interativa para documentação e teste da API.
 
 ---
 
 ## 2.2. Motor de Inteligência (Python)
 A camada de IA é um microserviço especializado em Processamento de Linguagem Natural (PLN):
-
 *	Python 3.10+ / Flask: Servidor leve para exposição do modelo.
-*	scikit-learn (1.8.0): Biblioteca de Machine Learning utilizada no treinamento e predição.
+*	scikit-learn (1.6.1): Biblioteca de Machine Learning utilizada no treinamento e predição.
 *	Joblib: Carregamento do modelo serializado.
+
+---
+
+## 2.3. Frontend React
+Frontend React intuitivo e moderno.:
+* React.js (Vite) – Framework principal e ferramenta de build.
+* Axios – Cliente HTTP para consumo da API REST.
+* EventSource (SSE) – Protocolo para recebimento de alertas em tempo real.
+* React-Chartjs-2 – Integração para visualização de dados (utilizando Chart.js).
+* Lucide-React – Biblioteca de ícones leves e modernos.
+* CSS Dinâmico – Estilização baseada em estados para feedback visual do usuári
 
 ---
 
 # 3. Arquitetura do Sistema
 A arquitetura segue o modelo de microserviços, onde o Java atua como o Gateway principal:
-1. O cliente envia o feedback para o endpoint protegido via Basic Auth.
+1. O cliente envia o feedback.
 2. O Spring Boot valida a requisição e delega a análise textual para o Flask.
 3. O Flask utiliza o modelo de ML carregado pelo Joblib para classificar o texto.
 4. O resultado retorna ao Java, que utiliza o Hibernate para salvar no PostgreSQL.
 5. Todo o fluxo é registrado via log SLF4J.
 
 # 4. Exemplo de Requisição e Resposta
-
 Especificação da API (Interface de Uso)  
 O acesso à inteligência é centralizado no endpoint abaixo. O sistema aceita textos individuais e permite o ajuste fino da sensibilidade da classificação.
 * Endpoint: POST http://localhost:8080/sentiment
-* Autenticação: Basic Auth (Username/Password)
 
 Corpo da Requisição (JSON)
   
@@ -58,7 +67,7 @@ Detalhamento dos Campos
 
 * "comentario" é um tipo string obrigatório.
 * "threshold" é um tipo float que pode ser opcional.  
-  Observação sobre o Threshold: > Este campo permite ajustar o rigor da classificação.  
+  Observação sobre o Threshold: Este campo permite ajustar o rigor da classificação.  
   Por padrão (0.5), qualquer predição com probabilidade superior a esse valor é marcada como POSITIVO.  
   Se você deseja que o modelo seja mais criterioso para classificar algo como positivo, você pode aumentar este valor (ex: 0.8).
 
@@ -68,9 +77,13 @@ Resposta (JSON)
 {
   "id": 102,
   "sentimento": "NEGATIVO",
-  "probabilidade": 0.67,
-  "topFeatures": ["demais", "muito", "entrega"],
-  "criadoEm": "2025-12-30T10:15:30"
+  "probabilidade": 0.73,
+  "topFeatures": [
+    "aparelho",
+    "demais",
+    "entrega"
+  ],
+  "criadoEm": "30/12/2025 10:15:30"
 }
 ```
 Detalhamento dos Campos  
@@ -78,9 +91,9 @@ Detalhamento dos Campos
 * "sentimento" mostra o resultado da predição (positivo ou negativo).
 * "probabilidade" mostra a probabilidade (confiança).
 * "topFeatures" mostra as palavras de maior peso na predição.
-* "criadoEm" fixa a data e hora da resposta.  
+* "criadoEm" data e hora da resposta.  
 
-Todas os elementos da resposta são gravados no banco de dados.
+*Todas os elementos da resposta são gravados no banco de dados.*
 
 ---
 
@@ -91,6 +104,9 @@ O diferencial deste modelo é a sua capacidade de explicar a decisão através d
 3.	***Regressão Logística:*** Atribui um peso (coeficiente) para cada palavra.  
 Palavras com pesos positivos altos (ex: "excelente") empurram o veredito para a classe Positiva; pesos negativos (ex: "defeito") empurram para a classe Negativa.
 4.	***Extração de Features:*** O sistema filtra as palavras com os maiores pesos absolutos na frase e as expõe no campo topFeatures, fornecendo transparência ao usuário.  
+## 5.1. 🔬 Pesquisa e Treinamento (Notebook)
+* Todo o processo de análise exploratória, pré-processamento de texto e treinamento do modelo pode ser visualizado no Google Colab:
+* [Link para o Notebook do Projeto] https://colab.research.google.com/drive/1JUXChsX75nqmHp2DfWP6nJo0srwcwX0_?usp=sharing
 
 
 # 6. Documentação da Interface (Swagger UI)
@@ -123,6 +139,12 @@ Utilizado para análises em lote.
 Descrição: Aceita arquivos via multipart/form-data (ex: arquivo .csv).  
 Clique em "Try it out", selecione o arquivo local e clique em "Execute".  
 O sistema retorna uma lista de objetos processados salvos no banco de dados, ideal para auditorias em larga escala ou carga inicial de dados.
+
+* Endpoint *POST /feedbacknow/usuarios/cadastrar*  
+Descrição: Cadastra usuarios pra usar o sistema.
+
+* Endpoint *POST /debug/comentario*  
+Descrição: Testa a integração Instagram/Facebook Graph API manualmente, sem precisar que alguém realmente comente no seu Facebook ou Instagram. Ainda em implementação.
 
 ---
 
@@ -164,7 +186,7 @@ Tratamento genérico para qualquer outra falha não prevista.
 ---
 
 ## 📝 Notas importantes:
-- ***Segurança:*** Todos os endpoints também estão protegidos pelo Spring Security (Basic Auth), exigindo o cabeçalho de autorização.
+- ***Segurança:*** O uso do token JWT é integrada ao Frontend; após o login, o token é armazenado de forma segura e anexado ao Header de Autorização de todas as chamadas subsequentes às rotas protegidas.
 - ***Logs:*** Cada consulta gera um log via SLF4J, permitindo rastrear quem acessou os dados e quando.
 - ***Persistência:*** Todos os dados são recuperados diretamente do PostgreSQL através das interfaces do Spring Data JPA, garantindo alta performance nas consultas.
 - ***Conteinerização:*** O projeto está totalmente conteinerizado, permitindo que toda a infraestrutura (Banco de Dados, Motor de IA e API Rest) suba de forma coordenada.  
@@ -200,11 +222,17 @@ Feedbacknow/
 |   ├── .dockerignore
 |   ├── Dockerfile
 │   └── pom.xml
+├── frontend-react/
+│   ├── src /
+|   ├── .dockerignore
+|   ├── Dockerfile
+│   ├── package.json
+│   └── vite.config.js
+│   
 ├── .env.example
 ├── docker-compose.yml
 └── README.md
 ```
-
 
 ## 9.3. Configuração das Variáveis de Ambiente (Obrigatório)  
 Por questões de segurança e boas práticas, o arquivo que contém as senhas (.env) não é enviado para o GitHub.  
@@ -213,16 +241,25 @@ Para que o sistema funcione, você precisa ativar as configurações padrão:
 2.	Crie uma cópia deste arquivo e mude o nome da cópia para (.env).
 3.	Este arquivo já possui as credenciais padrão para que o ambiente de teste suba imediatamente.
 ## 9.4. Inicialização com Docker  
-* Abra o terminal (ou Prompt de Comando) na pasta raiz do projeto (onde está o arquivo docker-compose.yml) e execute:
-```docker-compose up --build```
-* O Docker irá baixar as imagens do PostgreSQL, configurar o ambiente Python, compilar a API Java e orquestrar a comunicação entre eles.
+* Abra o terminal na pasta raiz do projeto (onde está o arquivo docker-compose.yml) e execute:
+```
+docker-compose up --build -d
+```
+* Vai subir todo o ecossistema (Front, Back, Motor de IA e Banco)
+* O Docker irá baixar as imagens do PostgreSQL, configurar o ambiente Python, compilar a API Java, subir o Frontend React e orquestrar a comunicação entre eles.
 ## 9.5. Acesso ao Sistema  
-Assim que os logs indicarem que os serviços estão ativos, você poderá acessar:
-*	Documentação Swagger (Para Testes): http://localhost:8080/swagger-ui.html   
-* Para fins de avaliação e facilidade de deploy, as credenciais de acesso ao Swagger foram mantidas fixas no arquivo application.properties.  
-Em um ambiente produtivo, estas seriam gerenciadas via Secrets ou Variáveis de Ambiente no Docker Compose.  
-    Username:  _user_  
-    Password:  _123456_ 
+Assim que os logs indicarem que os serviços estão ativos um usuario padrão é salvo no banco de dados com senha criptografada, e então você poderá acessar:
+### 9.5.1. Documentação Swagger (Para Testes): http://localhost:8080/swagger-ui.html      
+Username:  _admin_  
+Password:  _123456_ 
+
+### 9.5.2. Frontend React: http://localhost:5173/
+* Dashboard inteligente para monitoramento de sentimentos em tempo real, intuitivo e moderno.
+  * Depois de entrar basta escolher "Enviar feedback" no menu do Cliente.
+  * Para ver os comentarios salvos no banco, estatisticas, gerar relatorios e analisar lotes de comentários
+  escolha "Menu Empresa".
+    * usuario: _admin_
+    * senha: _123456_
 
 ---
 
@@ -232,13 +269,112 @@ Em um ambiente produtivo, estas seriam gerenciadas via Secrets ou Variáveis de 
 O uso do .env.example permite que novos desenvolvedores configurem seu ambiente local de forma rápida e segura.
 
 ---
+# 10. Integração Instagram/Facebook Graph API (Webhook + ngrok) 
+Esta integração permite que o sistema receba feedbacks diretamente do Instagram Direct e Facebook em tempo real.  
+O feedback chega no Java, é enviado para a api flask fazer a classificação, o resultado retorna ao Java que salva no banco de dados.
+
+# Importante:
+Para implementar a integração do Instagram/Facebook com este sistema, é necessária a configuração prévia no painel da Meta (Meta for Developers).  
+Esse processo é mais complexo e envolve várias etapas como:  
+* Ter uma conta de desenvolvedor Meta
+* Criar um app no Meta for Developers
+* Adicionar os produtos: Instagram Graph API e/ou Facebook Login
+* Configurar permissões e escopos
+* Gerar access tokens válidos
+* Configurar webhooks no painel com o callback (ngrok)
+* Testar eventos usando o botão de teste no dashboard  
+
+Apesar de estar preparado para essa integração, essa configuração não é obrigatória para o uso básico do sistema.  
+
+## 10.1. Configurando o Túnel (ngrok api gateway)  
+O ngrok cria um túnel seguro que expõe o sistema em execução no ambiente local por meio de uma URL pública.  
+Assim, a Meta pode enviar os dados para a aplicação.  
+
+* Instruçoes para instalação:  
+* Faça a inscrição no ngrok para receber seu free token
+* Baixe e instale o ngrok  https://ngrok.com/download/windows  
+* Autenticação: ngrok config add-authtoken SEU_TOKEN.
+* Execução: ngrok http 8080  
+* Vai gerar uma URL (https://xxxx.ngrok-free.dev).  
+* Copie esta URL, posteriormente será usada na configuração do webhook na Meta developer.
+
+## 10.2. Configuração no Painel da Meta  
+
+* Instruções para configuração da Meta https://www.youtube.com/watch?v=BuF9g9_QC04
+* Acesse https://developers.facebook.com e cadastre-se como desenvolvedor.
+* No painel clique em Criar App, selecione o tipo certo (geralmente Business ou For Everything Else).  
+* Adicione os produtos Instagram Graph API e Messenger (ou qualquer outro necessário, como Webhooks).
+* Conectar sua página do Facebook e conta Instagram Business.  
+Sua Página do Facebook deve estar vinculada a uma conta profissional do Instagram.  
+As contas devem estar conectadas nos próprios settings do Facebook/Instagram.  
+* Gerar tokens de acesso, usando a ferramenta Graph API Explorer ou a seção de Tokens do painel para gerar um token com as permissões necessárias (como instagram_manage_messages para receber mensagens).
+* Configurar webhooks, vá para a seção de Webhooks do app no dashboard.
+Insira a URL de callback do webhook (que será seu endpoint local exposto via ngrok, por exemplo https://<seu-ngrok>.ngrok-free.dev/webhook).
+Defina um verify token e publique. Escolha os campos/assinaturas que você quer receber, como messages e messaging_postbacks para Messenger/Instagram. 
+* Testar o webhook, no próprio dashboard você pode testar o webhook e ver se sua API local está recebendo os eventos de teste antes de testar com mensagens reais.
+* Configurar os tokens da Meta no sistema java no arquivo ".env" da estrutura do docker e subir novamente o sistema.   
+---
+ 
+ ## 10.3. Simulação e Testes de Integração (Postman)  
+ Como o Webhook depende de eventos externos da Meta, utilizamos o Postman para simular o envio de dados reais para o sistema.  
+ Isso permite validar o processamento de IA e a persistência no banco de dados de forma controlada.  
+ 
+### 10.3.1. Como executar os testes de configuração da URL 
+ * No Postman, utilize a sua URL do ngrok: POST https://seu-link-ngrok.ngrok-free.dev/webhookHeaders   
+ * Campos obrigatórios no postman:  
+   * **Headers:**  
+   Key: *Content-Type*  
+   Value: *application/json*  
+   Key: *ngrok-skip-browser-warning* (Necessário para túneis gratuitos do ngrok)  
+   Value: *true*
+
+ * Exemplos de Payloads para Teste:
+ Simulação Instagram (Sentimento Positivo)
+
+```json
+{
+  "object": "instagram",
+  "entry": [{
+    "changes": [{
+      "field": "comments",
+      "value": {
+        "text": "O atendimento foi excelente, amei o produto!",
+        "from": { "username": "cliente_teste" }
+      }
+    }]
+  }]
+}
+```
+Simulação Facebook (Sentimento Negativo)
+```json
+
+{
+  "object": "page",
+  "entry": [{
+    "changes": [{
+      "field": "feed",
+      "value": {
+        "message": "Odiei o produto, a entrega demorou demais!",
+        "from": { "name": "Usuario Teste" }
+      }
+    }]
+  }]
+}
+```
+### 11.3.2 Resultados Esperados
+Ao disparar os testes acima, você poderá observar em tempo real: 
+* Logs do Java: O sistema exibindo a captura do texto e a chamada ao motor de IA.
+* Logs do Flask: A inteligência processando a predição.
+* Banco de Dados: O registro sendo criado no PostgreSQL com a classificação correta e as topFeatures.
+
+---
 
 ## 🌐 CORS
 
-Configurado para permitir acesso do frontend local (Streamlit):
+Configurado para permitir acesso do frontend local:
 
 ```text
-http://localhost:8501
+http://localhost:5173
 ```
 ---
 
@@ -250,15 +386,15 @@ http://localhost:8501
 ✔ Threshold para ajustar o rigor da probabilidade  
 ✔ Tratamento global de erros  
 ✔ Logs estruturados  
-✔ Segurança com Spring Security
+✔ Segurança com Spring Security (JWT)  
+✔ Integração Instagram Graph API  
+✔ Frontend React
+✔ Testes automatizados (unitários e integração)
 
 ---
 
 ## 🚧 Recursos Opcionais / Próximos Passos
-
-* 📈 Interface Web (Streamlit ou Frontend JS)
-* 🧪 Testes automatizados (unitários e integração)
-
+* Implementação do sistema na OCI Oracle
 ---
 
 ## 👨‍💻 Autor
@@ -281,3 +417,6 @@ http://localhost:8501
 ## 📄 Licença
 
 * Este projeto é livre para uso educacional e estudos.
+---
+
+
