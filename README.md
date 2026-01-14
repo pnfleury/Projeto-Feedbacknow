@@ -193,7 +193,7 @@ Tratamento genérico para qualquer outra falha não prevista.
 
 ---  
 # 9. 🐳 Como baixar o projeto e executar via Docker.
-Este guia orienta como baixar e rodar toda a infraestrutura (Banco de dados, Motor de IA e API Rest) utilizando Docker.
+Este guia orienta como baixar e rodar toda a infraestrutura (Banco de dados, Motor de IA, API Rest e frontend) utilizando Docker.
 ## 9.1. Pré-requisitos 
 * Docker instalado e em execução.  
 * Faça download e instale o Docker Desktop na sua máquina: https://www.docker.com/get-started
@@ -388,7 +388,7 @@ http://localhost:5173
 ✔ Logs estruturados  
 ✔ Segurança com Spring Security (JWT)  
 ✔ Integração Instagram Graph API  
-✔ Frontend React
+✔ Frontend React  
 ✔ Testes automatizados (unitários e integração)
 
 ---
